@@ -4,7 +4,7 @@ const r = (option)=>{
   return new Promise((res,rej)=>{
     request(option,(error, response, body)=>{
       if(error){
-        return rej({'error':'服务器错误'})
+        return rej(error)
       }
       res(response)
     })
@@ -58,5 +58,8 @@ module.exports=async function(req,res,next){
   res.set('Content-Type', 'application/json')
   // console.log(req.body)
   const [err,response] = await wrequest(req.body)
+  if(err){
+    return res.send(err)
+  }
   return res.send(response.body)
 }

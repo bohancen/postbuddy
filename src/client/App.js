@@ -103,12 +103,27 @@ class App extends Component {
         const [err,data] = await clientAxios(option)
         if(data){
           console.log(data)
+          let stringData = ''
+          if(typeof data === 'object'){
+            stringData = JSON.stringify(data)
+          }else{
+            stringData = data
+          }
+          document.querySelector(`#result-${activeID}`).innerText = stringData
         }
         if(err){
           console.log(err)
         }
       },
       addTab(){
+        let {tabs,activeID} = this.state
+        let curTab = null
+        for(let tab of tabs){
+          if(tab.id == activeID){
+            curTab = tab
+            break
+          }
+        }
         let members = {
           url:'http://',
           method:'get',
@@ -116,6 +131,11 @@ class App extends Component {
           headers:[],
           qs:[],
           form:[],
+        }
+        let script = '';
+        if(curTab){
+          members = {...members,...curTab.members}
+          script = curTab.script
         }
         let id = new Date().getTime()
 
@@ -127,6 +147,7 @@ class App extends Component {
             {
               id,
               members,
+              script,
             }
           ]
         })
@@ -148,7 +169,7 @@ class App extends Component {
           }
           return pre
         },[])
-        console.log(tabs)
+        // console.log(tabs)
         this.setStates({
           ...this.state,
           activeID,
@@ -180,7 +201,6 @@ class App extends Component {
         for(let tab of tabs){
           if(tab.id == activeID){
             tab.members[memberskey] = tab.members[memberskey].reduce((pre,cur)=>{
-              console.log(1)
               if(cur.id !== id){
                 pre.push(cur)
               }
@@ -199,7 +219,7 @@ class App extends Component {
         let {tabs,activeID} = this.state
         for(let tab of tabs){
           if(tab.id == activeID){
-            if(memberskey == 'url' || memberskey == 'url'){
+            if(memberskey == 'url' || memberskey == 'method'){
               tab.members[memberskey] = targetVal
               break
             }
@@ -305,14 +325,14 @@ class App extends Component {
     return <div className="wrap">
       <div className="tabs">
         {
-          tabs.map(({id},index)=>{
-            return <div className="tab" key={id}>
-              <div className={id===activeID?'active':''} onClick={this.event().changeTab.bind(this,id)}>{id}</div>
-              <button onClick={this.event().delTab.bind(this,id)}>-</button>
+          tabs.map(({id,members},index)=>{
+            return <div className={`tab ${id===activeID?'active':''}`} key={id}>
+              <div onClick={this.event().changeTab.bind(this,id)} title={members.url}>{members.url}</div>
+              <button className="btn btn-del" onClick={this.event().delTab.bind(this,id)}></button>
             </div>
           })
         }
-        <button onClick={this.event().addTab.bind(this)}>+</button>
+        <button className="btn btn-add" onClick={this.event().addTab.bind(this)}></button>
       </div>
       <div className="body">
         {
@@ -338,12 +358,12 @@ class App extends Component {
                             <div>key: <input onChange={this.event().editTabMembers.bind(this,{memberskey,id,key})} defaultValue={key} type="text"/></div>
                             <div>value: <input onChange={this.event().editTabMembers.bind(this,{memberskey,id,value})} defaultValue={value} type="text"/></div>
                             <div>description: <input onChange={this.event().editTabMembers.bind(this,{memberskey,id,description})} defaultValue={description} type="text"/></div>
-                            <button onClick={this.event().delTabMembers.bind(this,{memberskey,id})}>-</button>
+                            <button className="btn btn-del" onClick={this.event().delTabMembers.bind(this,{memberskey,id})}></button>
                           </div>    
                         })
                       }
                       <div>
-                        <button onClick={this.event().addTabMembers.bind(this,{memberskey})}>+</button>
+                        <button className="btn btn-add" onClick={this.event().addTabMembers.bind(this,{memberskey})}></button>
                       </div>
                     </div>
                     
@@ -352,20 +372,28 @@ class App extends Component {
                 })
               }
               <div>
-                pre-request-script:
-                <textarea id={`textarea_${activeID}`} defaultValue={script} cols="30" rows="10"></textarea>
-                <button onClick={this.event().saveScript.bind(this)}>save</button>
+                <div className="flex-center">
+                  pre-request-script:
+                  <button className="btn btn-save" onClick={this.event().saveScript.bind(this)} title="save script"></button>
+                </div>
+                <div className="flex-center">
+                  <textarea className="textarea" id={`textarea_${activeID}`} defaultValue={script} cols="30" rows="10"></textarea>
+                  <button className="btn btn-send" onClick={this.event().send.bind(this)} title="send"></button>
+                </div>
+              </div>
+              <div>
+                <div>result:</div>
+                <code id={`result-${activeID}`}></code>
               </div>
             </div>
           })
         }
       </div>
-      <button onClick={this.event().send.bind(this)}>send</button>
       <div>
         <button onClick={this.event().exportConfig.bind(this)}>exportConfig</button>
         <button onClick={this.event().importConfig.bind(this)}>importConfig</button>
       </div>
-      <div className="background" style={{backgroundImage:`url(${this.backgroundImage})`}}></div>
+      {/* <div className="background" style={{backgroundImage:`url(${this.backgroundImage})`}}></div> */}
     </div>
   }
 }
