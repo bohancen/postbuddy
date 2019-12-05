@@ -120,7 +120,7 @@ class App extends Component {
         let curTab = null
         for(let tab of tabs){
           if(tab.id == activeID){
-            curTab = tab
+            curTab = JSON.parse(JSON.stringify(tab))
             break
           }
         }
