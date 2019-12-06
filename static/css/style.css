@@ -1,6 +1,6 @@
 *{margin: 0;padding: 0;}
 body{font-size: 14px;background: #bfbfbf;}
-.wrap{position: relative;}
+.wrap{position: relative;min-width: 780px;padding-bottom: 200px;}
 textarea{height: 10em;width: 30em;}
 .tabs{display: flex;margin-bottom: 10px;align-items: center;flex-wrap:wrap}
 .tab{display: flex;cursor: pointer;padding:10px;align-items: center;transition: all ease .2s;}
@@ -9,6 +9,7 @@ textarea{height: 10em;width: 30em;}
 .tab >div{width: 120px;overflow: hidden;height: 30px;white-space: nowrap;line-height: 30px;font-size: 12px;}
 .flex{display: flex;margin-bottom: 3px;align-items: center;}
 .flex-center{display: flex;align-items: center;margin-bottom: 10px;}
+.flex-right{display: flex;justify-content: flex-end;}
 .item{
   margin-bottom: 10px;
   display: grid;
@@ -21,11 +22,15 @@ button{padding: 0 5px;}
 .btn{border:none;width: 25px;height: 25px;background: none;background-size: cover;background-repeat: no-repeat;background-position: 50% 50%;cursor: pointer;filter: grayscale(100%);transition: all ease .2s;}
 .btn:hover{filter: grayscale(0%);}
 .btn-del{background-image: url(../images/del.png);width: 20px;height: 20px;margin-left: 5px;}
+.btn-show{background-image: url(../images/show.png)}
 .btn-add{background-image: url(../images/add.png);}
 .btn-save{background-image: url(../images/save.png);margin-left: 10px;}
 .btn-send{background-image: url(../images/send.png);margin-left: 20px;width: 150px;height: 150px;}
 /* body:after{pointer-events: none;content:"postBuddy";font-size: 100px;position: absolute;top: 10%;left: 0;text-align:center;opacity: .1;animation:rotate 3s linear infinite alternate;font-style: italic;transform:rotate(20deg);display:block;width: 100%;} */
 .background{position: fixed;top: -30vh;left: -30vw;width: 200vw;height: 200vh;pointer-events: none;transform:rotate(20deg);opacity: .2;}
+.res-result{word-break: break-word;}
+.globle-script{position: fixed;right: 10px;width: 600px;bottom: 0;}
+.globle-script .textarea{width: 100%;}
 @keyframes rotate{
   0%{opacity: .2;}
   100%{opacity: .1;}

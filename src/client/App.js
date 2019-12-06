@@ -3,6 +3,21 @@ import md5 from 'md5';
 import axios from 'axios';
 import clientAxios from './tools/client.axios';
 
+class Pack extends React.Component {
+  constructor(props){
+    super(props)
+  }
+  render(){
+    if(this.props.if === false){
+      return null
+    }
+    const props = {...this.props,...{if:undefined}}
+    return <div className={this.props.className} {...props}>
+      {this.props.children}
+    </div>
+  }
+}
+
 window.md5 = md5
 // console.log(md5('message'))
 class App extends Component {
@@ -10,6 +25,7 @@ class App extends Component {
     super(props)
     let defauleState = {
       activeID:0,
+      globleScript:'',
       // tabs[0]{
       //   id,
       //   script:''
@@ -30,6 +46,9 @@ class App extends Component {
     }catch(e){console.log(e)}
     this.state = localStorageState || defauleState
 
+    if(this.state.globleScript){
+      this.event().runScript(this.state.globleScript)
+    }
     this.state.tabs.forEach(tab => {
       if(tab.script){
         this.event().runScript(tab.script,tab.id)
@@ -90,16 +109,20 @@ class App extends Component {
           pre = {
             url,method,headers,qs,form
           }
-          // script
-          if(window[`script_${activeID}`]){
-            pre = window[`script_${activeID}`](pre)
-          }
           return pre
         },null)
         if(option === null){
           throw new Error('option error')
         }
-        option.qs.ts = (new Date().getTime()/1000).toFixed(0)
+        // globle script
+        if(window[`script_globle`]){
+          option = window[`script_globle`](option)
+        }
+        // self script
+        if(window[`script_${activeID}`]){
+          option = window[`script_${activeID}`](option)
+        }
+        // option.qs.ts = (new Date().getTime()/1000).toFixed(0)
         const [err,data] = await clientAxios(option)
         if(data){
           console.log(data)
@@ -240,6 +263,7 @@ class App extends Component {
         })
       },
       runScript(val,activeID){
+        activeID = activeID || 'globle'
         // 创建脚本
         let eleScript = document.createElement('script')
         eleScript.innerHTML = `
@@ -249,6 +273,19 @@ class App extends Component {
           }
         `
         document.body.appendChild(eleScript)
+      },
+      showScript(){
+        let {tabs,activeID} = this.state
+        for(let tab of tabs){
+          if(tab.id == activeID){
+            tab.show = !tab.show
+            break
+          }
+        }
+        this.setStates({
+          ...this.state,
+          tabs
+        })
       },
       saveScript(){
         let {tabs,activeID} = this.state
@@ -265,6 +302,21 @@ class App extends Component {
         this.setStates({
           ...this.state,
           tabs
+        })
+      },
+      showGlobleScript(){
+        let {showGlobleScript} = this.state
+        showGlobleScript = !showGlobleScript
+        this.setStates({
+          ...this.state,
+          showGlobleScript
+        })
+      },
+      saveGlobleScript(){
+        let globleScript = document.querySelector(`#textarea_globle`).value
+        this.setStates({
+          ...this.state,
+          globleScript
         })
       },
       importConfig(){
@@ -321,7 +373,7 @@ class App extends Component {
   }
   render() {
     // console.log(this.state)
-    let {activeID,tabs} = this.state
+    let {activeID,tabs,globleScript,showGlobleScript} = this.state
     return <div className="wrap">
       <div className="tabs">
         {
@@ -336,7 +388,7 @@ class App extends Component {
       </div>
       <div className="body">
         {
-          tabs.map(({members,id,script},index)=>{
+          tabs.map(({members,id,script,show},index)=>{
             if(activeID !== id){return null}
             return <div key={id} className="page">
               {
@@ -373,17 +425,18 @@ class App extends Component {
               }
               <div>
                 <div className="flex-center">
-                  pre-request-script:
+                  self-pre-request-script:
+                  <button className="btn btn-show" onClick={this.event().showScript.bind(this)} title="show script"></button>
                   <button className="btn btn-save" onClick={this.event().saveScript.bind(this)} title="save script"></button>
                 </div>
-                <div className="flex-center">
+                <Pack if={!!show} className="flex-center">
                   <textarea className="textarea" id={`textarea_${activeID}`} defaultValue={script} cols="30" rows="10"></textarea>
                   <button className="btn btn-send" onClick={this.event().send.bind(this)} title="send"></button>
-                </div>
+                </Pack>
               </div>
               <div>
                 <div>result:</div>
-                <code id={`result-${activeID}`}></code>
+                <div className="res-result" id={`result-${activeID}`}></div>
               </div>
             </div>
           })
@@ -392,6 +445,16 @@ class App extends Component {
       <div>
         <button onClick={this.event().exportConfig.bind(this)}>exportConfig</button>
         <button onClick={this.event().importConfig.bind(this)}>importConfig</button>
+      </div>
+      <div className="globle-script">
+        <div className="flex-center flex-right">
+          globle-pre-request-script:
+          <button className="btn btn-show" onClick={this.event().showGlobleScript.bind(this)} title="show script"></button>
+          <button className="btn btn-save" onClick={this.event().saveGlobleScript.bind(this)} title="save globle script"></button>
+        </div>
+        <Pack if={!!showGlobleScript} className="flex-center">
+          <textarea className="textarea" id={`textarea_globle`} defaultValue={globleScript} cols="30" rows="10"></textarea>
+        </Pack>
       </div>
       {/* <div className="background" style={{backgroundImage:`url(${this.backgroundImage})`}}></div> */}
     </div>
