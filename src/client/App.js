@@ -314,6 +314,7 @@ class App extends Component {
       },
       saveGlobleScript(){
         let globleScript = document.querySelector(`#textarea_globle`).value
+        this.event().runScript(globleScript)
         this.setStates({
           ...this.state,
           globleScript
@@ -431,12 +432,14 @@ class App extends Component {
                 </div>
                 <Pack if={!!show} className="flex-center">
                   <textarea className="textarea" id={`textarea_${activeID}`} defaultValue={script} cols="30" rows="10"></textarea>
-                  <button className="btn btn-send" onClick={this.event().send.bind(this)} title="send"></button>
                 </Pack>
+                <button className="btn btn-send" onClick={this.event().send.bind(this)} title="send"></button>
               </div>
               <div>
                 <div>result:</div>
-                <div className="res-result" id={`result-${activeID}`}></div>
+                <div className="res-result-outer">
+                  <textarea className="res-result" id={`result-${activeID}`}></textarea>
+                </div>
               </div>
             </div>
           })
