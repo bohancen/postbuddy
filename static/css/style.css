@@ -1,10 +1,11 @@
 *{margin: 0;padding: 0;}
 body{font-size: 14px;background: #bfbfbf;overflow-x: hidden;}
-.wrap{position: relative;min-width: 780px;}
+.wrap{position: relative;min-width: 780px;padding-bottom: 100px;}
 textarea{height: 10em;width: 30em;}
-.tabs{display: flex;margin-bottom: 10px;align-items: center;flex-wrap:wrap}
-.tab{display: flex;cursor: pointer;padding:10px;align-items: center;transition: all ease .2s;}
-.tab:hover{background-color: #adadad;}
+.tabs{display: flex;margin-bottom: 10px;overflow: hidden;overflow-x: auto;width: 100%;}
+.inner-tabs{display: flex;align-items: center;}
+.tab{display: flex;cursor: pointer;padding:10px;align-items: center;transition: background ease .2s;position: relative;width: 165px;box-sizing: border-box;border-left: 1px solid #9c9c9c;}
+.tab:hover{background-color: #adadad;z-index: 1;}
 .tab.active{font-weight: bold;background-color: #9c9c9c;}
 .tab >div{width: 120px;overflow: hidden;height: 30px;white-space: nowrap;line-height: 30px;font-size: 12px;}
 .flex{display: flex;margin-bottom: 3px;align-items: center;}
@@ -13,7 +14,7 @@ textarea{height: 10em;width: 30em;}
 .item{
   margin-bottom: 10px;
   display: grid;
-  grid-template-columns: 70px 3fr;
+  grid-template-columns: 80px 3fr;
   /* grid-template-rows: 1fr 3fr; */
 }
 button{padding: 0 5px;}
@@ -43,9 +44,9 @@ input[type="text"]{border:1px solid #666;border-radius: 2px;box-sizing: border-b
 .input01{width: 415px;}
 
 
-::-webkit-scrollbar{width: 4px;transition: all ease .5s}
-::-webkit-scrollbar-track{background:transparent;transition: all ease .5s}
-::-webkit-scrollbar-thumb{border-radius: 2px;transition: all ease .5s}
+::-webkit-scrollbar{width: 4px;transition: all ease .5s;height: 5px;}
+::-webkit-scrollbar-track{transition: all ease .5s;}
+::-webkit-scrollbar-thumb{border-radius: 2px;transition: all ease .5s;background: #ababab;}
 /* :hover::-webkit-scrollbar{width: 4px;background:#f0f0f0;} */
 /* :hover::-webkit-scrollbar-track{background:#8c8c8c;} */
-:hover::-webkit-scrollbar-thumb{background: #8c8c8c;}
+/* :hover::-webkit-scrollbar-thumb{background: #8c8c8c;} */

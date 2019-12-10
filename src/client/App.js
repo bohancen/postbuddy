@@ -26,6 +26,7 @@ class App extends Component {
     let defauleState = {
       activeID:0,
       globleScript:'',
+      description:'',
       // tabs[0]{
       //   id,
       //   script:''
@@ -82,7 +83,17 @@ class App extends Component {
       return canvas.toDataURL()
     }
     this.backgroundImage = createBackground()
-    
+    this.pageX = 0
+    document.addEventListener('mousemove',(e)=>{
+      this.pageX = e.pageX
+      if(this.tabEle){
+        this.tabEle.style.transform = `translateX(${this.pageX - this.startX}px)`
+        // this.stopChangeTab = true
+      }
+    })
+    document.addEventListener('mouseup',(e)=>{
+      this.event().sortTab.call(this)
+    })
   }
   componentDidMount(){
   }
@@ -148,6 +159,7 @@ class App extends Component {
           }
         }
         let members = {
+          description:'',
           url:'http://',
           method:'get',
           // headers,qs,form = {id,key,value,description}
@@ -176,6 +188,8 @@ class App extends Component {
         })
       },
       delTab(id,e){
+        e.stopPropagation()
+        console.log('delTab')
         let {tabs,activeID} = this.state
         tabs = tabs.reduce((pre,cur,index)=>{
           if(cur.id === id){
@@ -192,7 +206,6 @@ class App extends Component {
           }
           return pre
         },[])
-        // console.log(tabs)
         this.setStates({
           ...this.state,
           activeID,
@@ -200,9 +213,56 @@ class App extends Component {
         })
       },
       changeTab(activeID){
+        console.log('changeTab')
+        if(this.stopChangeTab){
+          return this.stopChangeTab = false
+        }
         this.setStates({
           ...this.state,
           activeID
+        })
+      },
+      sortTab(){
+        let state = this.state
+        if(this.tabEle == null){
+          return
+        }
+        let rect = this.tabEle.getBoundingClientRect()
+        let {width} = rect
+        this.tabEle.style.transform = null
+        this.tabEle = null
+        let elX = this.startX - this.tabIndex * width
+        let charX = ((this.pageX - elX) / width )
+        // 四舍五入
+        let index = Math.floor(Math.abs(charX))
+        // 判断最大值
+        let maxIndex = state.tabs.length-1
+        index = index > maxIndex ? maxIndex:index
+        if(index == this.tabIndex){
+          return 
+        }
+        // 排序
+        let index0 = this.tabIndex
+        let index1 = index
+        let tabs = state.tabs.reduce((pre,tab,dex)=>{
+          if(dex == index0){
+            pre[index1] = tab
+            return pre
+          }
+          if(dex == index1){
+            pre[index0] = tab
+            return pre
+          }
+          pre[dex] = tab
+          return pre
+        },{})
+        tabs = Object.keys(tabs).reduce((pre,key)=>{
+          pre.push(tabs[key])
+          return pre
+        },[])
+        this.setStates({
+          ...this.state,
+          tabs
         })
       },
       addTabMembers({memberskey}){
@@ -242,7 +302,7 @@ class App extends Component {
         let {tabs,activeID} = this.state
         for(let tab of tabs){
           if(tab.id == activeID){
-            if(memberskey == 'url' || memberskey == 'method'){
+            if(memberskey == 'url' || memberskey == 'method' || memberskey == 'description'){
               tab.members[memberskey] = targetVal
               break
             }
@@ -369,6 +429,24 @@ class App extends Component {
         a.dataset.downloadurl = ['text/json', a.download, a.href].join(':')
         e.initMouseEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
         a.dispatchEvent(e)
+      },
+      mouseDown(index,e){
+        e.preventDefault()
+        this.tabEle = e.currentTarget
+        this.tabIndex = index
+        this.startX = this.pageX
+      },
+      mouseMove(){},
+      mouseUp(){},
+      onWheel(e){
+        // console.log(e)
+        // console.log(e.deltaY)
+        // console.log(e.currentTarget.scrollLeft)
+        if(e.deltaY >0){
+          e.currentTarget.scrollLeft+= 50
+        }else{
+          e.currentTarget.scrollLeft-= 50
+        }
       }
     }
   }
@@ -376,16 +454,20 @@ class App extends Component {
     // console.log(this.state)
     let {activeID,tabs,globleScript,showGlobleScript} = this.state
     return <div className="wrap">
-      <div className="tabs">
-        {
-          tabs.map(({id,members},index)=>{
-            return <div className={`tab ${id===activeID?'active':''}`} key={id}>
-              <div onClick={this.event().changeTab.bind(this,id)} title={members.url}>{members.url}</div>
-              <button className="btn btn-del" onClick={this.event().delTab.bind(this,id)}></button>
-            </div>
-          })
-        }
-        <button className="btn btn-add" onClick={this.event().addTab.bind(this)}></button>
+      <div className="tabs" onWheel={this.event().onWheel}>
+          <div className="inner-tabs">
+          {
+            tabs.map(({id,members},index)=>{
+              return <div onMouseDown={this.event().mouseDown.bind(this,index)} onClick={this.event().changeTab.bind(this,id)} className={`tab ${id===activeID?'active':''}`} key={id}>
+                <div title={members.url}>{members.description||members.url}</div>
+                {/* <div onMouseMove={this.event().mouseMove.bind(this)} onMouseUp={this.event().mouseUp.bind(this)} onMouseDown={this.event().mouseDown.bind(this)} onClick={this.event().changeTab.bind(this,id)} title={members.url}>{members.description||members.url}</div> */}
+                <button className="btn btn-del" onClick={this.event().delTab.bind(this,id)}></button>
+              </div>
+            })
+          }
+          {/* 增加按钮 */}
+          <button className="btn btn-add" onClick={this.event().addTab.bind(this)}></button>
+        </div>
       </div>
       <div className="body">
         {
@@ -395,7 +477,7 @@ class App extends Component {
               {
                 Object.keys(members).map((memberskey,index)=>{
                   let value = members[memberskey]
-                  if(memberskey === 'url' || memberskey === 'method'){
+                  if(memberskey === 'url' || memberskey === 'method'|| memberskey === 'description'){
                     return <div key={index} className="item">
                       <div className="key">{memberskey}</div>
                       <div className="values"><input className="input01" onChange={this.event().editTabMembers.bind(this,{memberskey})} defaultValue={value} type="text" /></div>
