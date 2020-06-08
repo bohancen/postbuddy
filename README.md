@@ -11,3 +11,7 @@
   yarn start-prod
   yarn webpack-client-dev
   yarn webpack-client-prod
+
+## 运行
+
+  pm2 start pm2.config.js --env prod
