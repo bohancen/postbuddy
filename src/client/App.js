@@ -143,7 +143,9 @@ class App extends Component {
           }else{
             stringData = data
           }
-          document.querySelector(`#result-${activeID}`).innerText = stringData
+          // document.querySelector(`#result-${activeID}`).innerText = stringData
+          // document.querySelector(`#result-${activeID}`).innerHTML = stringData
+          document.querySelector(`#result-${activeID}`).value = stringData
         }
         if(err){
           console.log(err)
