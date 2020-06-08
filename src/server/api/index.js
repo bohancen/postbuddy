@@ -2,6 +2,14 @@ const request = require('request')
 const md5 = require('md5')
 const r = (option)=>{
   return new Promise((res,rej)=>{
+    // 追加header
+    let appendHeaders = {
+      'user-agent':'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
+    }
+    option.headers = {
+      ...option.headers,
+      ...appendHeaders
+    }
     request(option,(error, response, body)=>{
       if(error){
         return rej(error)
